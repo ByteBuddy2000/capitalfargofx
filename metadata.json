@@ -1,0 +1,6 @@
+{
+  "name": "CapitalFargoFX",
+  "description": "A modern digital investment and cryptocurrency asset-management platform featuring structured investment plans, real-time ledger accounting, referral systems, and comprehensive admin controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

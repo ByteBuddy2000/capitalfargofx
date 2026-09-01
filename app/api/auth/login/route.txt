@@ -1,0 +1,45 @@
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { NextRequest, NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/mongodb';
+import { User } from '@/models/User';
+
+export type LoginRequestBody = {
+  identifier?: string;
+  email?: string;
+  password?: string;
+};
+
+const publicUser = (user: any) => {
+  const value = user.toObject ? user.toObject() : user;
+  delete value.passwordHash;
+  value.id = value._id?.toString() || value.id;
+  delete value._id;
+  return value;
+};
+
+const tokenFor = (user: any): string =>
+  jwt.sign({ sub: user._id.toString(), role: user.role }, process.env.JWT_SECRET as string, {
+    expiresIn: '7d',
+  });
+
+export async function POST(request: NextRequest): Promise<NextResponse<{ token: string; user: any } | { message: string }>> {
+  try {
+    await connectToDatabase();
+    const body = (await request.json()) as LoginRequestBody;
+    const identifier = body.identifier?.trim().toLowerCase() || body.email?.trim().toLowerCase();
+
+    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash').exec();
+    if (!user || !(await bcrypt.compare(body.password || '', user.passwordHash))) {
+      return NextResponse.json({ message: 'Invalid login credentials.' }, { status: 401 });
+    }
+    if (user.status !== 'ACTIVE') {
+      return NextResponse.json({ message: `This account is ${user.status.toLowerCase()}.` }, { status: 403 });
+    }
+
+    return NextResponse.json({ token: tokenFor(user), user: publicUser(user) });
+  } catch (error: unknown) {
+    console.error(error);
+    return NextResponse.json({ message: 'Internal server error.' }, { status: 500 });
+  }
+}
