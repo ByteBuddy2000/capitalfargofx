@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { ShieldAlert, FileText, Lock, Cookie } from 'lucide-react';
 
@@ -17,12 +17,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
   initialDocType = 'terms',
   type
 }) => {
-  const [activeType, setActiveType] = useState<LegalDocType>(type || initialDocType);
-
-  useEffect(() => {
-    if (type) setActiveType(type);
-    else if (initialDocType) setActiveType(initialDocType);
-  }, [type, initialDocType, isOpen]);
+  const [activeType, setActiveType] = useState<LegalDocType>(() => type || initialDocType);
 
   const content = {
     terms: {
@@ -43,7 +38,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
           <h4 className="text-sm font-bold text-slate-900">3. Investment Plans & Maturity Execution</h4>
           <p>
-            All investment plans (including Basic, Gold, and Ultimate tiers) represent structured computational asset allocation agreements. Yields and durations are determined strictly by configured contract parameters. Maturity settlements are recorded irrevocably onto the platform's double-entry financial ledger.
+            All investment plans (including Basic, Gold, and Ultimate tiers) represent structured computational asset allocation agreements. Yields and durations are determined strictly by configured contract parameters. Maturity settlements are recorded irrevocably onto the platform&apos;s double-entry financial ledger.
           </p>
 
           <h4 className="text-sm font-bold text-slate-900">4. Deposits & Blockchain Verification</h4>
