@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AboutSection } from '@/components/landing/AboutSection';
 import { AlternativeInvestments } from '@/components/landing/AlternativeInvestments';
 import { CryptoAssets } from '@/components/landing/CryptoAssets';
@@ -18,14 +18,13 @@ import { WhyChooseUs } from '@/components/landing/WhyChooseUs';
 import { ToastProvider } from '@/components/ui/Toast';
 import { LegalModal, type LegalDocType } from '@/components/legal/LegalModal';
 import { storage } from '@/lib/storage';
-import type { InvestmentPlan, User } from '@/types';
+import type { User } from '@/types';
 
 export default function HomePage() {
   const [currentUser] = useState<User | null>(() => storage.getCurrentUser());
-  const [plans] = useState<InvestmentPlan[]>(() => storage.getPlans());
+  const [plans] = useState(() => storage.getPlans());
   const [legalDocType, setLegalDocType] = useState<LegalDocType>('terms');
   const [legalModalOpen, setLegalModalOpen] = useState(false);
-  const [preselectedPlan, setPreselectedPlan] = useState<InvestmentPlan | null>(null);
 
   const scrollTo = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });

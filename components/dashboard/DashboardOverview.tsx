@@ -404,14 +404,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activeInvestments.map(inv => {
-                const start = new Date(inv.startDate).getTime();
-                const end = new Date(inv.maturityDate).getTime();
+              {(() => {
                 const now = Date.now();
-                const progress = Math.min(100, Math.max(0, Math.round(((now - start) / (end - start)) * 100)));
-                
-                return (
-                  <div key={inv.id} className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#2563EB]/40 transition-all">
+                return activeInvestments.map(inv => {
+                  const start = new Date(inv.startDate).getTime();
+                  const end = new Date(inv.maturityDate).getTime();
+                  const progress = Math.min(100, Math.max(0, Math.round(((now - start) / (end - start)) * 100)));
+                  
+                  return (
+                    <div key={inv.id} className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#2563EB]/40 transition-all">
                     <div className="flex items-center justify-between mb-2.5">
                       <div>
                         <span className="text-xs font-bold text-[#0F172A]">{inv.planName} Plan</span>

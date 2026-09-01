@@ -17,16 +17,16 @@ export type RegisterRequestBody = {
   referralCode?: string;
 };
 
-export type PublicUser = Omit<any, 'passwordHash' | '_id'> & {
+export type PublicUser = Omit<Record<string, unknown>, 'passwordHash' | '_id'> & {
   id?: string;
 };
 
-const publicUser = (user: any): PublicUser => {
+const publicUser = (user: InstanceType<typeof User>): PublicUser => {
   const value = user.toObject ? user.toObject() : user;
-  delete value.passwordHash;
-  value.id = value._id?.toString() || value.id;
-  delete value._id;
-  return value;
+  delete (value as Record<string, unknown>).passwordHash;
+  (value as Record<string, unknown>).id = (value as Record<string, unknown>)._id?.toString() || (value as Record<string, unknown>).id;
+  delete (value as Record<string, unknown>)._id;
+  return value as PublicUser;
 };
 
 export async function POST(request: NextRequest): Promise<NextResponse<{ user: PublicUser } | { message: string }>> {

@@ -52,7 +52,8 @@ export const AdminWithdrawals: React.FC<AdminWithdrawalsProps> = ({ currentUser 
 
   const handleOpenApprove = (w: Withdrawal) => {
     setTargetWithdrawal(w);
-    setBroadcastTxHash(`0x${Math.random().toString(36).substring(2, 12)}broadcast_${Date.now()}`);
+    const broadcastId = `0x${Math.random().toString(36).substring(2, 12)}broadcast_${Date.now()}`;
+    setBroadcastTxHash(broadcastId);
     setApproveModalOpen(true);
   };
 

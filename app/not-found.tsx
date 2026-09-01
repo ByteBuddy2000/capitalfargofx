@@ -19,7 +19,7 @@ export default function NotFound() {
 
         {/* Error Description */}
         <p className="mb-8 text-lg text-slate-400">
-          Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.
+          Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved or deleted.
         </p>
 
         {/* Navigation Buttons */}

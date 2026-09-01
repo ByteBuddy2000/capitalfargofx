@@ -167,7 +167,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
       <div className="text-center pt-4 border-t border-slate-100">
         <p className="text-xs text-slate-600">
-          Don't have an investor profile?{' '}
+          Don&apos;t have an investor profile?{' '}
           <button
             type="button"
             onClick={onSwitchToRegister}

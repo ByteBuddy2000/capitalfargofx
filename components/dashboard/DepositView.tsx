@@ -43,12 +43,12 @@ export const DepositView: React.FC<DepositViewProps> = ({
   
   // Selection States
   const initialPlan = storage.getPlans()[0];
-  const [selectedPlanId, setSelectedPlanId] = useState<string>(
+  const [selectedPlanId, setSelectedPlanId] = useState<string>(() =>
     preselectedPlan?.id || storage.getPlans()[1]?.id || initialPlan?.id || 'plan-gold'
   );
   const selectedPlan = plans.find(p => p.id === selectedPlanId) || plans[0] || storage.getPlans()[0];
 
-  const [amount, setAmount] = useState<number>(
+  const [amount, setAmount] = useState<number>(() =>
     preselectedPlan ? preselectedPlan.minimumAmount : selectedPlan?.minimumAmount || 10000
   );
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT'>('USDT');
@@ -61,31 +61,19 @@ export const DepositView: React.FC<DepositViewProps> = ({
   const [copiedWallet, setCopiedWallet] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fallbackPlans = storage.getPlans();
-    setPlans(fallbackPlans);
-
-    const fallbackPlan = preselectedPlan || fallbackPlans[1] || fallbackPlans[0];
-    if (fallbackPlan && !fallbackPlans.some(plan => plan.id === selectedPlanId)) {
-      setSelectedPlanId(fallbackPlan.id);
-      setAmount(fallbackPlan.minimumAmount);
-    }
 
     authApi.plans()
       .then((loadedPlans) => {
         const nextPlans = loadedPlans.length > 0 ? loadedPlans : fallbackPlans;
         setPlans(nextPlans);
-        const nextPlan = preselectedPlan || nextPlans[1] || nextPlans[0];
-        if (nextPlan && !nextPlans.some(plan => plan.id === selectedPlanId)) {
-          setSelectedPlanId(nextPlan.id);
-          setAmount(nextPlan.minimumAmount);
-        }
       })
       .catch(error => {
         setErrorMsg(error instanceof Error ? error.message : 'Unable to load investment plans.');
         setPlans(fallbackPlans);
       });
-  }, [preselectedPlan, selectedPlanId]);
+  }, []);
 
   // Selected wallet from admin config
   const activeWalletConfig = wallets.find(w => w.symbol === selectedCrypto) || wallets[0];

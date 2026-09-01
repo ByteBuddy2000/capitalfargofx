@@ -3,7 +3,7 @@ import { requireAdmin } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Deposit, type IDeposit } from '@/models/Deposit';
 import { Investment } from '@/models/Investment';
-import { User } from '@/models/User';
+import { User, type IUser } from '@/models/User';
 import { Transaction } from '@/models/Transaction';
 import { type IPlan } from '@/models/Plan';
 
@@ -21,7 +21,7 @@ export async function POST(
     const { id } = await params;
     const body = (await request.json().catch(() => ({}))) as { adminNotes?: string };
 
-    const deposit = await Deposit.findOne({ _id: id, status: 'PENDING' }).populate('planId').populate('userId').exec() as (IDeposit & { planId: IPlan; userId: any }) | null;
+    const deposit = await Deposit.findOne({ _id: id, status: 'PENDING' }).populate('planId').populate('userId').exec() as (IDeposit & { planId: IPlan; userId: IUser }) | null;
     if (!deposit) {
       return NextResponse.json({ message: 'Pending deposit not found.' }, { status: 404 });
     }

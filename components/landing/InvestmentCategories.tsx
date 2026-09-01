@@ -73,7 +73,7 @@ export const InvestmentCategories: React.FC<InvestmentCategoriesProps> = ({ onSe
               Diversified Investment Categories
             </h2>
             <p className="text-base text-slate-600 mt-2 max-w-xl">
-              Access comprehensive multi-market asset classes managed by CapitalFargoFX's automated portfolio algorithms.
+              Access comprehensive multi-market asset classes managed by CapitalFargoFX&apos;s automated portfolio algorithms.
             </p>
           </div>
         </div>

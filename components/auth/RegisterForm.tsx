@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { User as UserIcon, Mail, Lock, ShieldCheck, ArrowRight, Wallet, Users, CheckCircle2 } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import { storage } from '../../lib/storage';
@@ -15,6 +15,15 @@ interface RegisterFormProps {
   onSwitchToLogin: () => void;
   onOpenTerms: () => void;
 }
+
+const getReferralCodeFromURL = (initial?: string): string => {
+  if (initial) return initial;
+  if (typeof window !== 'undefined') {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('ref') || '';
+  }
+  return '';
+};
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
   initialReferralCode,
@@ -34,34 +43,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const [usdtWallet, setUsdtWallet] = useState('');
   const [agreedTerms, setAgreedTerms] = useState(false);
 
-  const [referralCode, setReferralCode] = useState(initialReferralCode || '');
-  const [uplineUser, setUplineUser] = useState<User | null>(null);
+  const [referralCode, setReferralCode] = useState(() => getReferralCodeFromURL(initialReferralCode));
+  const [uplineUser, setUplineUser] = useState<User | null>(() => {
+    const code = getReferralCodeFromURL(initialReferralCode);
+    return code.trim() ? storage.getUserByUsername(code.trim()) || null : null;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const { success, error: toastError } = useToast();
-
-  useEffect(() => {
-    // If URL has ?ref=... or initialReferralCode
-    if (typeof window !== 'undefined' && !initialReferralCode) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const ref = urlParams.get('ref');
-      if (ref) setReferralCode(ref);
-    }
-  }, [initialReferralCode]);
-
-  useEffect(() => {
-    if (referralCode.trim()) {
-      const found = storage.getUserByUsername(referralCode.trim());
-      if (found) {
-        setUplineUser(found);
-      } else {
-        setUplineUser(null);
-      }
-    } else {
-      setUplineUser(null);
-    }
-  }, [referralCode]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();

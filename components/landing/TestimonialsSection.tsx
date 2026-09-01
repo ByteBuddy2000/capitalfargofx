@@ -50,7 +50,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ testim
                 </div>
 
                 <p className="text-xs sm:text-sm text-slate-700 leading-relaxed italic mb-8">
-                  "{test.message}"
+                  &quot;{test.message}&quot;
                 </p>
               </div>
 
