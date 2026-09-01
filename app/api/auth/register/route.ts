@@ -1,7 +1,8 @@
 // app/api/auth/register/route.ts
 import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectToDB } from "@/lib/connectToDB";
+
 import { User } from '@/models/User';
 import { Referral } from '@/models/Referral';
 
@@ -30,7 +31,7 @@ const publicUser = (user: any): PublicUser => {
 
 export async function POST(request: NextRequest): Promise<NextResponse<{ user: PublicUser } | { message: string }>> {
   try {
-    await connectToDatabase();
+    await connectToDB();
     const body = (await request.json()) as RegisterRequestBody;
     const { fullName, username, email, password, btcWallet = '', ethWallet = '', usdtWallet = '', referralCode = '' } = body;
 

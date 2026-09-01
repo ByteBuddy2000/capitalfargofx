@@ -1,11 +1,12 @@
-import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
+// app/auth.ts
 import bcrypt from "bcryptjs";
-
+import type { NextAuthConfig } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { connectToDB } from "@/lib/connectToDB";
 import { User } from "@/models/User";
-import { connectToDatabase } from "@/lib/mongodb";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+
+export const authOptions: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
@@ -15,7 +16,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 
   providers: [
-    Credentials({
+    CredentialsProvider({
       name: "Credentials",
 
       credentials: {
@@ -40,7 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const password = String(credentials.password);
 
-        await connectToDatabase();
+        await connectToDB();
 
         const user = await User.findOne({
           $or: [
@@ -113,26 +114,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     }
   },
-});
 
-// Middleware: Require authenticated user
-export async function requireAuth() {
-  const session = await auth();
+  secret: process.env.NEXTAUTH_SECRET,
+};
 
-  if (!session?.user) {
-    throw new Error("Unauthorized: No session found");
-  }
+// // Middleware: Require authenticated user
+// export async function requireAuth() {
+//   const session = await auth();
 
-  return session.user;
-}
+//   if (!session?.user) {
+//     throw new Error("Unauthorized: No session found");
+//   }
 
-// Middleware: Require authenticated admin
-export async function requireAdmin() {
-  const user = await requireAuth();
+//   return session.user;
+// }
 
-  if (user.role !== "ADMIN") {
-    throw new Error("Forbidden: Admin role required");
-  }
+// // Middleware: Require authenticated admin
+// export async function requireAdmin() {
+//   const user = await requireAuth();
 
-  return user;
-}
+//   if (user.role !== "ADMIN") {
+//     throw new Error("Forbidden: Admin role required");
+//   }
+
+//   return user;
+// }
