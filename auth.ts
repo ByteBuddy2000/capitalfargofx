@@ -1,12 +1,12 @@
-// app/auth.ts
-import bcrypt from "bcryptjs";
+// auth.ts - NextAuth v5 configuration (project root)
+import NextAuth from "next-auth";
 import type { NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import { connectToDB } from "@/lib/connectToDB";
 import { User } from "@/models/User";
 
-
-export const authOptions: NextAuthConfig = {
+const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
@@ -112,30 +112,11 @@ export const authOptions: NextAuthConfig = {
       }
 
       return session;
-    }
+    },
   },
 
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// // Middleware: Require authenticated user
-// export async function requireAuth() {
-//   const session = await auth();
-
-//   if (!session?.user) {
-//     throw new Error("Unauthorized: No session found");
-//   }
-
-//   return session.user;
-// }
-
-// // Middleware: Require authenticated admin
-// export async function requireAdmin() {
-//   const user = await requireAuth();
-
-//   if (user.role !== "ADMIN") {
-//     throw new Error("Forbidden: Admin role required");
-//   }
-
-//   return user;
-// }
+// NextAuth v5 exports: handlers, auth, signIn, signOut
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);

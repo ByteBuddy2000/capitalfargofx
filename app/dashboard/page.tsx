@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import DashboardClient from './DashboardClient';
 import type { User } from '@/types';
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session?.user?.email) {
     redirect('/login');
