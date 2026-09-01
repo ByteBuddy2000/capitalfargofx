@@ -169,6 +169,24 @@ export interface Referral {
 
 export type LedgerDirection = 'CREDIT' | 'DEBIT';
 
+/**
+ * Strongly-typed metadata for ledger entries.
+ * Used to store additional context about financial transactions.
+ */
+export interface LedgerMetadata {
+  adminId?: string;
+  adminNotes?: string;
+  commissionRate?: number;
+  referralBonusPercentage?: number;
+  investmentId?: string;
+  depositId?: string;
+  withdrawalId?: string;
+  reason?: string;
+  previousStatus?: string;
+  newStatus?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
 export interface LedgerEntry {
   id: string;
   userId: string;
@@ -181,7 +199,7 @@ export interface LedgerEntry {
   balanceBefore: number;
   balanceAfter: number;
   description: string;
-  metadata?: Record<string, any>;
+  metadata?: LedgerMetadata;
   createdAt: string;
 }
 

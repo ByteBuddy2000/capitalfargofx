@@ -12,7 +12,8 @@ import {
   Testimonial,
   CryptoWalletConfig,
   PlatformSettings,
-  AuditLog
+  AuditLog,
+  SupportTicket
 } from '../types';
 
 const STORAGE_KEYS = {
@@ -928,12 +929,12 @@ class StorageService {
   }
 
   // Support Tickets
-  getSupportTickets(): any[] {
-    const tickets = this.get<any[]>('capitalfargo_support_tickets', []);
+  getSupportTickets(): SupportTicket[] {
+    const tickets = this.get<SupportTicket[]>('capitalfargo_support_tickets', []);
     return Array.isArray(tickets) ? tickets : [];
   }
 
-  saveSupportTickets(tickets: any[]): void {
+  saveSupportTickets(tickets: SupportTicket[]): void {
     this.set('capitalfargo_support_tickets', tickets);
   }
 

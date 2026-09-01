@@ -21,16 +21,11 @@ import { storage } from '@/lib/storage';
 import type { InvestmentPlan, User } from '@/types';
 
 export default function HomePage() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [plans, setPlans] = useState(storage.getPlans());
+  const [currentUser] = useState<User | null>(() => storage.getCurrentUser());
+  const [plans] = useState<InvestmentPlan[]>(() => storage.getPlans());
   const [legalDocType, setLegalDocType] = useState<LegalDocType>('terms');
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [preselectedPlan, setPreselectedPlan] = useState<InvestmentPlan | null>(null);
-
-  useEffect(() => {
-    setCurrentUser(storage.getCurrentUser());
-    setPlans(storage.getPlans());
-  }, []);
 
   const scrollTo = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });

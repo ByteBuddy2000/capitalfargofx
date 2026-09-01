@@ -6,8 +6,8 @@ import {
   Withdrawal,
   Transaction,
   LedgerEntry,
+  LedgerMetadata,
   Notification,
-  InvestmentPlan,
   AuditAction
 } from '../types';
 
@@ -25,7 +25,7 @@ export class LedgerEngine {
     balanceBefore: number,
     balanceAfter: number,
     description: string,
-    metadata?: Record<string, any>
+    metadata?: LedgerMetadata
   ): LedgerEntry {
     const entry: LedgerEntry = {
       id: `ldg-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -779,9 +779,44 @@ export class LedgerEngine {
   }
 }
 
+// Union types for flexible API parameter overloading
+type DepositRequestParams = string | {
+  userId: string;
+  planId: string;
+  amount: number;
+  asset?: 'BTC' | 'ETH' | 'USDT';
+  cryptoCurrency?: 'BTC' | 'ETH' | 'USDT';
+  network?: string;
+  receivingAddress?: string;
+  destinationAddress?: string;
+  txHash?: string;
+  transactionHash?: string;
+};
+
+type WithdrawalRequestParams = string | {
+  userId: string;
+  amount: number;
+  asset?: 'BTC' | 'ETH' | 'USDT';
+  cryptoCurrency?: 'BTC' | 'ETH' | 'USDT';
+  network?: string;
+  destinationAddress?: string;
+};
+
+type BalanceAdjustmentParams = string | {
+  targetUserId?: string;
+  userId?: string;
+  amount: number;
+  type?: 'ADD' | 'SUBTRACT';
+  operation?: 'CREDIT' | 'DEBIT';
+  adminId?: string;
+  adminUser?: User;
+  reason?: string;
+  balanceType?: string; // For UI tracking
+};
+
 export const ledgerEngine = {
   createDepositRequest: (
-    arg1: any,
+    arg1: DepositRequestParams,
     planId?: string,
     amount?: number,
     asset?: 'BTC' | 'ETH' | 'USDT',
@@ -807,7 +842,7 @@ export const ledgerEngine = {
   },
 
   submitDepositRequest: (
-    arg1: any,
+    arg1: DepositRequestParams,
     planId?: string,
     amount?: number,
     asset?: 'BTC' | 'ETH' | 'USDT',
@@ -886,7 +921,7 @@ export const ledgerEngine = {
   },
 
   createWithdrawalRequest: (
-    arg1: any,
+    arg1: WithdrawalRequestParams,
     amount?: number,
     asset?: 'BTC' | 'ETH' | 'USDT',
     network?: string,
@@ -899,7 +934,7 @@ export const ledgerEngine = {
         opts.amount,
         opts.cryptoCurrency || opts.asset || 'BTC',
         opts.network || 'Mainnet',
-        opts.destinationAddress
+        opts.destinationAddress || ''
       );
       if (!res.success) throw new Error(res.error || 'Failed to submit withdrawal');
       return res.withdrawal!;
@@ -908,7 +943,7 @@ export const ledgerEngine = {
   },
 
   submitWithdrawalRequest: (
-    arg1: any,
+    arg1: WithdrawalRequestParams,
     amount?: number,
     asset?: 'BTC' | 'ETH' | 'USDT',
     network?: string,
@@ -921,7 +956,7 @@ export const ledgerEngine = {
         opts.amount,
         opts.cryptoCurrency || opts.asset || 'BTC',
         opts.network || 'Mainnet',
-        opts.destinationAddress
+        opts.destinationAddress || ''
       );
       if (!res.success) throw new Error(res.error || 'Failed to submit withdrawal');
       return res.withdrawal!;
@@ -999,7 +1034,7 @@ export const ledgerEngine = {
   },
 
   adjustUserBalance: (
-    arg1: any,
+    arg1: BalanceAdjustmentParams,
     amount?: number,
     type?: 'ADD' | 'SUBTRACT',
     adminUserOrId?: User | string,
@@ -1008,6 +1043,9 @@ export const ledgerEngine = {
     if (typeof arg1 === 'object') {
       const opts = arg1;
       const targetUserId = opts.targetUserId || opts.userId;
+      if (!targetUserId) {
+        return { success: false, error: 'Target user ID is required' };
+      }
       const adjustType: 'ADD' | 'SUBTRACT' = opts.operation === 'DEBIT' || opts.type === 'SUBTRACT' ? 'SUBTRACT' : 'ADD';
       const adjustAmount = Number(opts.amount) || 0;
       const adminUser: User = typeof opts.adminId === 'string'

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, QrCode } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { useToast } from './Toast';
 
 interface CryptoQRCodeProps {
