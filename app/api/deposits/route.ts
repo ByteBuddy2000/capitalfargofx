@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/mongodb';
@@ -29,10 +30,24 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as DepositRequestBody;
     const { planId, amount, asset, network = 'Mainnet', receivingAddress = '', txHash = '' } = body;
 
-    const plan = await Plan.findOne({ _id: planId, status: 'ACTIVE' }).exec() as IPlan | null;
-    if (!plan) {
-      return NextResponse.json({ message: 'Investment plan is unavailable.' }, { status: 400 });
+    const normalizedPlanId = typeof planId === 'string' ? planId.trim() : '';
+
+    if (!normalizedPlanId) {
+      return NextResponse.json({ message: 'Please choose a valid investment plan before submitting your deposit.' }, { status: 400 });
     }
+
+    let plan: IPlan | null = null;
+
+    if (mongoose.isValidObjectId(normalizedPlanId)) {
+      plan = await Plan.findOne({ $or: [{ _id: normalizedPlanId }, { slug: normalizedPlanId }], status: 'ACTIVE' }).exec() as IPlan | null;
+    } else {
+      plan = await Plan.findOne({ slug: normalizedPlanId, status: 'ACTIVE' }).exec() as IPlan | null;
+    }
+
+    if (!plan) {
+      return NextResponse.json({ message: 'That investment plan is unavailable or no longer active. Please select a different plan.' }, { status: 400 });
+    }
+
     if (!positiveAmount(amount) || Number(amount) < plan.minimumAmount || (plan.maximumAmount > 0 && Number(amount) > plan.maximumAmount)) {
       return NextResponse.json({ message: `Deposit must be between $${plan.minimumAmount} and ${plan.maximumAmount ? `$${plan.maximumAmount}` : 'the plan maximum'}.` }, { status: 400 });
     }
@@ -42,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     const deposit = await Deposit.create({
       userId: user._id,
-      planId,
+      planId: plan._id,
       amount,
       asset,
       network,
