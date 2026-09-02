@@ -8,26 +8,25 @@ function normalizeRecord<T extends { id?: string }>(record: T & { _id?: string }
   return record;
 }
 
-function normalizeDeposit(record: Deposit & { _id?: string; planId?: unknown }): Deposit {
-  const rawRecord = record as Deposit & {
-    _id?: string;
-    planId?: string | { _id?: string; id?: string; name?: string };
-    asset?: Deposit['asset'];
-    txHash?: string;
-  };
-  const plan = rawRecord.planId && typeof rawRecord.planId === 'object' ? rawRecord.planId : undefined;
-  const planId = typeof rawRecord.planId === 'string' ? rawRecord.planId : plan?.id || plan?._id || '';
-  const normalized = normalizeRecord({ ...rawRecord, planId } as Deposit & { _id?: string });
+function normalizeDeposit(record: Deposit & {
+  _id?: string;
+  userId?: string | { _id?: string; fullName?: string; username?: string; email?: string };
+  planId?: string | { _id?: string; name?: string };
+}) {
+  const user = typeof record.userId === 'object' && record.userId !== null ? record.userId : undefined;
+  const plan = typeof record.planId === 'object' && record.planId !== null ? record.planId : undefined;
+  const deposit = normalizeRecord(record as Deposit & { _id?: string });
 
-  return {
-    ...normalized,
-    planId,
-    planName: normalized.planName || plan?.name || 'Investment',
-    asset: normalized.asset || rawRecord.asset,
-    cryptoCurrency: normalized.cryptoCurrency || rawRecord.asset,
-    txHash: normalized.txHash || rawRecord.txHash,
-    transactionHash: normalized.transactionHash || rawRecord.txHash,
-  };
+  deposit.userId = user?._id || String(record.userId || '');
+  deposit.planId = plan?._id || String(record.planId || '');
+  deposit.userFullName = deposit.userFullName || user?.fullName || '';
+  deposit.userEmail = deposit.userEmail || user?.email;
+  deposit.planName = deposit.planName || plan?.name || '';
+  deposit.asset = deposit.asset || deposit.cryptoCurrency;
+  deposit.cryptoCurrency = deposit.cryptoCurrency || deposit.asset;
+  deposit.txHash = deposit.txHash || deposit.transactionHash;
+  deposit.transactionHash = deposit.transactionHash || deposit.txHash;
+  return deposit;
 }
 
 function normalizeHeaders(headers?: HeadersInit): Record<string, string> {

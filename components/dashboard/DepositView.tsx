@@ -513,7 +513,7 @@ export const DepositView: React.FC<DepositViewProps> = ({
               Deposit Order #{submittedDeposit?.id?.substring(0, 10) || ''}
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-              Your deposit of <strong className="text-slate-900">${(submittedDeposit?.amount || 0).toLocaleString()} USD</strong> ({submittedDeposit?.cryptoCurrency || 'Crypto'}) has been recorded into the platform verification queue.
+              Your deposit of <strong className="text-slate-900">${(submittedDeposit?.amount || 0).toLocaleString()} USD</strong> ({submittedDeposit?.asset || 'Crypto'}) has been recorded into the platform verification queue.
             </p>
           </div>
 
@@ -524,11 +524,11 @@ export const DepositView: React.FC<DepositViewProps> = ({
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Asset & Network:</span>
-              <span className="font-semibold text-slate-800">{submittedDeposit.cryptoCurrency} ({submittedDeposit.network})</span>
+              <span className="font-semibold text-slate-800">{submittedDeposit.asset} ({submittedDeposit.network})</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Transaction TXID:</span>
-              <span className="font-mono text-slate-800 truncate max-w-[200px]">{submittedDeposit.transactionHash}</span>
+              <span className="font-mono text-slate-800 truncate max-w-[200px]">{submittedDeposit.txHash}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Current Status:</span>

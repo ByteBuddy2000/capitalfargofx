@@ -23,7 +23,7 @@ interface AdminDepositsProps {
 }
 
 export const AdminDeposits: React.FC<AdminDepositsProps> = ({ currentUser }) => {
-  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'COMPLETED' | 'REJECTED'>('PENDING');
+  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
   const [searchTerm, setSearchTerm] = useState('');
   
   // Rejection modal
@@ -43,7 +43,7 @@ export const AdminDeposits: React.FC<AdminDepositsProps> = ({ currentUser }) => 
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       const matchUser = d.userFullName.toLowerCase().includes(q) || d.userId.toLowerCase().includes(q);
-      const matchTx = d.transactionHash?.toLowerCase().includes(q) ?? false;
+      const matchTx = d.txHash?.toLowerCase().includes(q) ?? false;
       const matchPlan = d.planName.toLowerCase().includes(q);
       if (!matchUser && !matchTx && !matchPlan) return false;
     }
@@ -72,6 +72,7 @@ export const AdminDeposits: React.FC<AdminDepositsProps> = ({ currentUser }) => 
       await authApi.rejectDeposit(targetDeposit.id, rejectReason);
       success('Deposit Rejected', `Deposit #${targetDeposit.id.substring(0, 10)} marked as rejected.`);
       setRejectModalOpen(false);
+      setAllDeposits(deposits => deposits.map(item => item.id === targetDeposit.id ? { ...item, status: 'REJECTED' } : item));
     } catch (error) {
       toastError('Error', error instanceof Error ? error.message : 'Unable to reject deposit.');
     }
@@ -98,7 +99,7 @@ export const AdminDeposits: React.FC<AdminDepositsProps> = ({ currentUser }) => 
         
         {/* Filter Tabs */}
         <div className="flex flex-wrap gap-2 pb-2 border-b border-slate-800">
-          {(['PENDING', 'ALL', 'COMPLETED', 'REJECTED'] as const).map(tab => (
+          {(['PENDING', 'ALL', 'APPROVED', 'REJECTED'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setFilter(tab)}
@@ -165,16 +166,16 @@ export const AdminDeposits: React.FC<AdminDepositsProps> = ({ currentUser }) => 
                       <span className="text-[10px] text-slate-400 block font-semibold">{d.planName} Plan</span>
                     </td>
                     <td className="py-4">
-                      <span className="font-bold text-white">{d.cryptoCurrency}</span>
+                      <span className="font-bold text-white">{d.asset}</span>
                       <span className="text-[10px] text-slate-400 block">{d.network}</span>
                     </td>
                     <td className="py-4">
                       <span className="font-mono text-[11px] text-amber-300 select-all break-all block max-w-xs">
-                        {d.transactionHash}
+                        {d.txHash}
                       </span>
                     </td>
                     <td className="py-4">
-                      <Badge variant={d.status === 'COMPLETED' ? 'success' : d.status === 'PENDING' ? 'warning' : 'danger'}>
+                      <Badge variant={d.status === 'APPROVED' ? 'success' : d.status === 'PENDING' ? 'warning' : 'danger'}>
                         {d.status}
                       </Badge>
                     </td>

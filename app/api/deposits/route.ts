@@ -82,7 +82,18 @@ export async function POST(request: NextRequest) {
       type: 'DEPOSIT',
     });
 
-    return NextResponse.json({ deposit }, { status: 201 });
+    return NextResponse.json({
+      deposit: {
+        ...deposit.toObject(),
+        planName: plan.name,
+        expectedReturnPercentage: plan.returnPercentage,
+        durationHours: plan.durationHours,
+        expectedProfit: Number(amount) * Number(plan.returnPercentage) / 100,
+        totalExpectedReturn: plan.principalReturn
+          ? Number(amount) + Number(amount) * Number(plan.returnPercentage) / 100
+          : Number(amount) * Number(plan.returnPercentage) / 100,
+      },
+    }, { status: 201 });
   } catch (error: unknown) {
     console.error(error);
     return NextResponse.json({ message: 'Internal server error.' }, { status: 500 });
