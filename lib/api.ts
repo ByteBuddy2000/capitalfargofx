@@ -8,6 +8,28 @@ function normalizeRecord<T extends { id?: string }>(record: T & { _id?: string }
   return record;
 }
 
+function normalizeDeposit(record: Deposit & { _id?: string; planId?: unknown }): Deposit {
+  const rawRecord = record as Deposit & {
+    _id?: string;
+    planId?: string | { _id?: string; id?: string; name?: string };
+    asset?: Deposit['asset'];
+    txHash?: string;
+  };
+  const plan = rawRecord.planId && typeof rawRecord.planId === 'object' ? rawRecord.planId : undefined;
+  const planId = typeof rawRecord.planId === 'string' ? rawRecord.planId : plan?.id || plan?._id || '';
+  const normalized = normalizeRecord({ ...rawRecord, planId } as Deposit & { _id?: string });
+
+  return {
+    ...normalized,
+    planId,
+    planName: normalized.planName || plan?.name || 'Investment',
+    asset: normalized.asset || rawRecord.asset,
+    cryptoCurrency: normalized.cryptoCurrency || rawRecord.asset,
+    txHash: normalized.txHash || rawRecord.txHash,
+    transactionHash: normalized.transactionHash || rawRecord.txHash,
+  };
+}
+
 function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
   if (!headers) return {};
   if (headers instanceof Headers) return Object.fromEntries(headers.entries());
@@ -43,14 +65,14 @@ export const authApi = {
   },
   async deposits() {
     const result = await request<{ deposits: (Deposit & { _id?: string })[] }>('/me/deposits');
-    return result.deposits.map(normalizeRecord);
+    return result.deposits.map(normalizeDeposit);
   },
   async createDeposit(data: { planId: string; amount: number; asset: string; network: string; receivingAddress?: string; txHash?: string }) {
     const result = await request<{ deposit: Deposit & { _id?: string } }>('/deposits', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    return normalizeRecord(result.deposit);
+    return normalizeDeposit(result.deposit);
   },
   async withdrawals() {
     const result = await request<{ withdrawals: (Withdrawal & { _id?: string })[] }>('/me/withdrawals');
@@ -79,7 +101,7 @@ export const authApi = {
   },
   async adminDeposits() {
     const result = await request<{ deposits: (Deposit & { _id?: string })[] }>('/admin/deposits');
-    return result.deposits.map(normalizeRecord);
+    return result.deposits.map(normalizeDeposit);
   },
   async approveDeposit(id: string, adminNotes = '') {
     return request(`/admin/deposits/${id}/approve`, {

@@ -1,4 +1,4 @@
-// lib/auth.ts - Auth utilities (requires auth from root)
+// lib/auth.ts - Auth utilities (requires auth from root)a
 import { auth } from "@/auth";
 
 /**
