@@ -18,11 +18,12 @@ import { WhyChooseUs } from '@/components/landing/WhyChooseUs';
 import { ToastProvider } from '@/components/ui/Toast';
 import { LegalModal, type LegalDocType } from '@/components/legal/LegalModal';
 import { storage } from '@/lib/storage';
-import type { User } from '@/types';
+import type { InvestmentPlan, User } from '@/types';
 
 export default function HomePage() {
   const [currentUser] = useState<User | null>(() => storage.getCurrentUser());
   const [plans] = useState(() => storage.getPlans());
+  const [, setPreselectedPlan] = useState<InvestmentPlan | null>(null);
   const [legalDocType, setLegalDocType] = useState<LegalDocType>('terms');
   const [legalModalOpen, setLegalModalOpen] = useState(false);
 
