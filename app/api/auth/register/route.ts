@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDB } from "@/lib/connectToDB";
 
-import { User } from '@/models/User';
+import { User, type IUser } from '@/models/User';
 import { Referral } from '@/models/Referral';
 
 export type RegisterRequestBody = {
@@ -17,17 +17,31 @@ export type RegisterRequestBody = {
   referralCode?: string;
 };
 
-export type PublicUser = Omit<Record<string, unknown>, 'passwordHash' | '_id'> & {
-  id?: string;
+export type PublicUser = {
+  id: string;
+  fullName: string;
+  username: string;
+  email: string;
+  role: string;
+  status: string;
+  btcWallet: string;
+  ethWallet: string;
+  usdtWallet: string;
+  uplineUsername: string | null;
 };
 
-const publicUser = (user: InstanceType<typeof User>): PublicUser => {
-  const value = user.toObject ? user.toObject() : user;
-  delete (value as Record<string, unknown>).passwordHash;
-  (value as Record<string, unknown>).id = (value as Record<string, unknown>)._id?.toString() || (value as Record<string, unknown>).id;
-  delete (value as Record<string, unknown>)._id;
-  return value as PublicUser;
-};
+const publicUser = (user: IUser): PublicUser => ({
+  id: user._id.toString(),
+  fullName: user.fullName,
+  username: user.username,
+  email: user.email,
+  role: user.role,
+  status: user.status,
+  btcWallet: user.btcWallet,
+  ethWallet: user.ethWallet,
+  usdtWallet: user.usdtWallet,
+  uplineUsername: user.uplineUsername,
+});
 
 export async function POST(request: NextRequest): Promise<NextResponse<{ user: PublicUser } | { message: string }>> {
   try {

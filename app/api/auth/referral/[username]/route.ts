@@ -1,24 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import { User } from '@/models/User';
+import { User, type IUser } from '@/models/User';
 
 interface PublicUserData {
   id: string;
   fullName: string;
   username: string;
   email: string;
-  role: string;
   status: string;
-  [key: string]: unknown;
 }
 
-const publicUser = (user: InstanceType<typeof User>): PublicUserData => {
-  const value = user.toObject ? user.toObject() : user;
-  delete (value as Record<string, unknown>).passwordHash;
-  (value as Record<string, unknown>).id = (value as Record<string, unknown>)._id?.toString() || (value as Record<string, unknown>).id;
-  delete (value as Record<string, unknown>)._id;
-  return value as PublicUserData;
-};
+const publicUser = (user: IUser): PublicUserData => ({
+  id: user._id.toString(),
+  fullName: user.fullName,
+  username: user.username,
+  email: user.email,
+  status: user.status,
+});
 
 export async function GET(
   _request: NextRequest,
@@ -27,14 +25,16 @@ export async function GET(
   try {
     await connectToDatabase();
     const { username } = await params;
-    const resolvedUsername = username.toLowerCase();
-    const user = await User.findOne({ username: resolvedUsername }).exec();
+    const resolvedUsername = username.trim().toLowerCase();
+    const user = await User.findOne({ username: resolvedUsername })
+      .select('fullName username email status')
+      .exec();
 
     if (!user) {
       return NextResponse.json({ message: 'Referral user not found.' }, { status: 404 });
     }
 
-    return NextResponse.json({ user: publicUser(user as InstanceType<typeof User>) });
+    return NextResponse.json({ user: publicUser(user) });
   } catch (error: unknown) {
     console.error(error);
     return NextResponse.json({ message: 'Internal server error.' }, { status: 500 });

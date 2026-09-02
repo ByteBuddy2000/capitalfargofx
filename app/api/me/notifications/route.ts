@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { requireAuth } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Notification } from '@/models/Notification';
@@ -31,7 +32,7 @@ export async function PATCH(request: Request): Promise<NextResponse<{ notificati
     }
 
     const body = (await request.json()) as { id?: string };
-    if (!body.id) {
+    if (!body.id || !mongoose.isValidObjectId(body.id)) {
       return NextResponse.json({ message: 'Notification id is required.' }, { status: 400 });
     }
 

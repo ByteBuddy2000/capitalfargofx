@@ -38,6 +38,21 @@ function normalizeDeposit(record: ApiDeposit): Deposit {
   return deposit;
 }
 
+type ApiInvestment = Omit<Investment, 'planId'> & {
+  _id?: string;
+  planId: string | PopulatedPlan;
+};
+
+function normalizeInvestment(record: ApiInvestment): Investment {
+  const planId = typeof record.planId === 'string' ? record.planId : record.planId._id || '';
+  const planName = typeof record.planId === 'string' ? undefined : record.planId.name;
+  return {
+    ...normalizeRecord(record as ApiInvestment),
+    planId,
+    planName: record.planName || planName || '',
+  } as Investment;
+}
+
 function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
   if (!headers) return {};
   if (headers instanceof Headers) return Object.fromEntries(headers.entries());
@@ -94,8 +109,8 @@ export const authApi = {
     return { withdrawal: normalizeRecord(result.withdrawal), user: result.user };
   },
   async investments() {
-    const result = await request<{ investments: (Investment & { _id?: string })[] }>('/me/investments');
-    return result.investments.map(normalizeRecord);
+    const result = await request<{ investments: ApiInvestment[] }>('/me/investments');
+    return result.investments.map(normalizeInvestment);
   },
   async settleInvestment(id: string) {
     const result = await request<{ investment: Investment & { _id?: string }; payout: number }>(`/investments/${id}/settle`, {
