@@ -2,24 +2,33 @@ import { User, InvestmentPlan, Deposit, Withdrawal, Investment, Transaction } fr
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
-function normalizeRecord<T extends { id?: string }>(record: T & { _id?: string }): T {
-  if (record._id && !record.id) record.id = record._id;
-  delete record._id;
-  return record;
+type MongoRecord = { _id?: string };
+
+function normalizeRecord<T extends { id?: string }>(record: T & MongoRecord): T {
+  const normalized = { ...record } as T & MongoRecord;
+  if (normalized._id && !normalized.id) normalized.id = normalized._id;
+  delete normalized._id;
+  return normalized;
 }
 
-function normalizeDeposit(record: Deposit & {
+type PopulatedUser = { _id?: string; fullName?: string; username?: string; email?: string };
+type PopulatedPlan = { _id?: string; name?: string };
+type ApiDeposit = Omit<Deposit, 'userId' | 'planId'> & {
   _id?: string;
-  userId?: string | { _id?: string; fullName?: string; username?: string; email?: string };
-  planId?: string | { _id?: string; name?: string };
-}) {
+  userId: string | PopulatedUser;
+  planId: string | PopulatedPlan;
+};
+
+function normalizeDeposit(record: ApiDeposit): Deposit {
   const user = typeof record.userId === 'object' && record.userId !== null ? record.userId : undefined;
   const plan = typeof record.planId === 'object' && record.planId !== null ? record.planId : undefined;
-  const deposit = normalizeRecord(record as Deposit & { _id?: string });
 
-  deposit.userId = user?._id || String(record.userId || '');
-  deposit.planId = plan?._id || String(record.planId || '');
+  const userId = user?._id || (typeof(record.userId) === 'string' ? record.userId : '');
+  const planId = plan?._id || (typeof(record.planId) === 'string' ? record.planId : '');
+  const deposit = { ...normalizeRecord(record as ApiDeposit), userId, planId } as Deposit;
+
   deposit.userFullName = deposit.userFullName || user?.fullName || '';
+  deposit.userUsername = deposit.userUsername || user?.username;
   deposit.userEmail = deposit.userEmail || user?.email;
   deposit.planName = deposit.planName || plan?.name || '';
   deposit.asset = deposit.asset || deposit.cryptoCurrency;
@@ -63,11 +72,11 @@ export const authApi = {
     return result.plans.map(normalizeRecord);
   },
   async deposits() {
-    const result = await request<{ deposits: (Deposit & { _id?: string })[] }>('/me/deposits');
+    const result = await request<{ deposits: ApiDeposit[] }>('/me/deposits');
     return result.deposits.map(normalizeDeposit);
   },
   async createDeposit(data: { planId: string; amount: number; asset: string; network: string; receivingAddress?: string; txHash?: string }) {
-    const result = await request<{ deposit: Deposit & { _id?: string } }>('/deposits', {
+    const result = await request<{ deposit: ApiDeposit }>('/deposits', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -99,7 +108,7 @@ export const authApi = {
     return result.transactions.map(normalizeRecord);
   },
   async adminDeposits() {
-    const result = await request<{ deposits: (Deposit & { _id?: string })[] }>('/admin/deposits');
+    const result = await request<{ deposits: ApiDeposit[] }>('/admin/deposits');
     return result.deposits.map(normalizeDeposit);
   },
   async approveDeposit(id: string, adminNotes = '') {
