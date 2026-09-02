@@ -16,10 +16,10 @@ interface PublicUserData {
 }
 
 const publicUser = (user: InstanceType<typeof User>): PublicUserData => {
-  const value = user.toObject ? user.toObject() : user;
-  delete (value as Record<string, unknown>).passwordHash;
-  (value as Record<string, unknown>).id = (value as Record<string, unknown>)._id?.toString() || (value as Record<string, unknown>).id;
-  delete (value as Record<string, unknown>)._id;
+  const value = (user.toObject ? user.toObject() : user) as unknown as Record<string, unknown>;
+  delete value.passwordHash;
+  value.id = value._id?.toString() || value.id;
+  delete value._id;
   return value as PublicUserData;
 };
 
