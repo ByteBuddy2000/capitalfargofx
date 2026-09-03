@@ -4,7 +4,6 @@ import {
   Wallet, 
   Lock, 
   ShieldCheck, 
-  Check, 
   Save, 
   KeyRound, 
   Mail, 
@@ -36,7 +35,7 @@ export const AccountView: React.FC<AccountViewProps> = ({ currentUser, onUpdateU
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
-  const { success, error: toastError } = useToast();
+  const { success } = useToast();
 
   const handleSaveWallets = (e: React.FormEvent) => {
     e.preventDefault();

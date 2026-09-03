@@ -1,7 +1,7 @@
  'use client';
 
 import React, { useState } from 'react';
-import { User as UserIcon, Lock, ArrowRight, ShieldCheck, UserCheck, KeyRound } from 'lucide-react';
+import { User as UserIcon, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User as UserIcon, Mail, Lock, ShieldCheck, ArrowRight, Wallet, Users, CheckCircle2 } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, ArrowRight, Wallet, Users, CheckCircle2 } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import { storage } from '../../lib/storage';
 import { User } from '../../types';
@@ -43,8 +43,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const [usdtWallet, setUsdtWallet] = useState('');
   const [agreedTerms, setAgreedTerms] = useState(false);
 
-  const [referralCode, setReferralCode] = useState(() => getReferralCodeFromURL(initialReferralCode));
-  const [uplineUser, setUplineUser] = useState<User | null>(() => {
+  const [referralCode] = useState(() => getReferralCodeFromURL(initialReferralCode));
+  const [uplineUser] = useState<User | null>(() => {
     const code = getReferralCodeFromURL(initialReferralCode);
     return code.trim() ? storage.getUserByUsername(code.trim()) || null : null;
   });

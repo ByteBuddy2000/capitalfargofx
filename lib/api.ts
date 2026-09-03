@@ -138,6 +138,25 @@ export const authApi = {
     const result = await request<{ deposits: ApiDeposit[] }>('/admin/deposits');
     return result.deposits.map(normalizeDeposit);
   },
+  async adminOverview() {
+    return request<{
+      users: Array<Record<string, unknown>>;
+      deposits: ApiDeposit[];
+      withdrawals: Array<Record<string, unknown>>;
+      investments: Array<Record<string, unknown>>;
+    }>('/admin/overview');
+  },
+  async adminUsers() {
+    const result = await request<{ users: Array<User & { _id?: string }> }>('/admin/users');
+    return result.users.map(normalizeRecord);
+  },
+  async updateAdminUser(data: { userId: string; status?: User['status']; balanceType?: 'available' | 'earning'; operation?: 'CREDIT' | 'DEBIT'; amount?: number; reason?: string }) {
+    const result = await request<{ user: User & { _id?: string } }>('/admin/users', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+    return normalizeRecord(result.user);
+  },
   async approveDeposit(id: string, adminNotes = '') {
     return request(`/admin/deposits/${id}/approve`, {
       method: 'POST',

@@ -10,17 +10,13 @@ import {
   Headphones, 
   LogOut, 
   Bell, 
-  ShieldCheck, 
   Lock, 
-  ChevronDown, 
-  Check, 
   X,
   Menu
 } from 'lucide-react';
-import { User, Notification } from '../../types';
+import { User } from '../../types';
 import { storage } from '../../lib/storage';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
 
 export type DashboardTab = 
   | 'overview' 

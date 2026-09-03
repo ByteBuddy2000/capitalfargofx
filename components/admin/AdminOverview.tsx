@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Users, 
   ArrowDownToLine, 
@@ -13,8 +13,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { User, Deposit, Withdrawal } from '../../types';
-import { storage } from '../../lib/storage';
-import { ledgerEngine } from '../../lib/ledgerEngine';
+import { authApi } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useToast } from '../ui/Toast';
@@ -28,11 +27,26 @@ interface AdminOverviewProps {
 export const AdminOverview: React.FC<AdminOverviewProps> = ({ currentUser, onNavigateTab }) => {
   const { success, error: toastError } = useToast();
 
-  const users = storage.getUsers();
-  const deposits = storage.getDeposits();
-  const withdrawals = storage.getWithdrawals();
-  const investments = storage.getInvestments();
-  const auditLogs = storage.getAuditLogs().slice(0, 6);
+  const [users, setUsers] = useState<User[]>([]);
+  const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
+  const [investments, setInvestments] = useState<Array<{ amount: number; status: string }>>([]);
+  const auditLogs: Array<{ id: string; action: string; actorUsername: string; entity: string; entityId?: string; notes?: string; timestamp: string }> = [];
+
+  useEffect(() => {
+    void authApi.adminOverview().then(data => {
+      setUsers(data.users as unknown as User[]);
+      setDeposits(data.deposits.map(deposit => ({
+        ...deposit,
+        userId: typeof deposit.userId === 'string' ? deposit.userId : deposit.userId?._id || '',
+        planId: typeof deposit.planId === 'string' ? deposit.planId : deposit.planId?._id || '',
+        userFullName: deposit.userFullName || (typeof deposit.userId === 'object' ? deposit.userId.fullName || '' : ''),
+        planName: deposit.planName || (typeof deposit.planId === 'object' ? deposit.planId.name || '' : ''),
+      })));
+      setWithdrawals(data.withdrawals as unknown as Withdrawal[]);
+      setInvestments(data.investments as Array<{ amount: number; status: string }>);
+    }).catch(error => toastError('Loading Error', error instanceof Error ? error.message : 'Unable to load overview.'));
+  }, [toastError]);
 
   const pendingDeposits = deposits.filter(d => d.status === 'PENDING');
   const pendingWithdrawals = withdrawals.filter(w => w.status === 'PENDING');
@@ -51,10 +65,10 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({ currentUser, onNav
 
   const handleQuickApproveDeposit = (deposit: Deposit) => {
     try {
-      const res = ledgerEngine.approveDeposit(deposit.id, currentUser.id);
-      if (res.success) {
+      void authApi.approveDeposit(deposit.id).then(() => {
+        setDeposits(current => current.filter(item => item.id !== deposit.id));
         success('Deposit Approved', `$${(deposit?.amount || 0).toLocaleString()} credited and investment activated!`);
-      }
+      }).catch(error => toastError('Approval Error', error instanceof Error ? error.message : 'Unable to approve deposit.'));
     } catch (e: any) {
       toastError('Approval Error', e.message);
     }
@@ -62,10 +76,10 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({ currentUser, onNav
 
   const handleQuickApproveWithdrawal = (withdrawal: Withdrawal) => {
     try {
-      const res = ledgerEngine.approveWithdrawal(withdrawal.id, currentUser.id);
-      if (res.success) {
+      void authApi.updateWithdrawal(withdrawal.id, 'COMPLETED').then(() => {
+        setWithdrawals(current => current.filter(item => item.id !== withdrawal.id));
         success('Withdrawal Dispatched', `$${(withdrawal?.amount || 0).toLocaleString()} broadcast to blockchain network.`);
-      }
+      }).catch(error => toastError('Approval Error', error instanceof Error ? error.message : 'Unable to approve withdrawal.'));
     } catch (e: any) {
       toastError('Approval Error', e.message);
     }

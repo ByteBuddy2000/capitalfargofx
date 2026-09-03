@@ -10,9 +10,8 @@ import {
   Ban, 
   KeyRound 
 } from 'lucide-react';
-import { User, UserRole, UserStatus } from '../../types';
-import { storage } from '../../lib/storage';
-import { ledgerEngine } from '../../lib/ledgerEngine';
+import { User, UserStatus } from '../../types';
+import { authApi } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
@@ -36,7 +35,13 @@ export const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
 
   const { success, error: toastError } = useToast();
 
-  const allUsers = storage.getUsers();
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+
+  React.useEffect(() => {
+    void authApi.adminUsers()
+      .then(setAllUsers)
+      .catch(error => toastError('Loading Error', error instanceof Error ? error.message : 'Unable to load users.'));
+  }, [toastError]);
 
   const filtered = allUsers.filter(u => {
     if (!searchTerm.trim()) return true;
@@ -55,45 +60,32 @@ export const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
     setAdjustModalOpen(true);
   };
 
-  const handleConfirmAdjust = () => {
+  const handleConfirmAdjust = async () => {
     if (!targetUser) return;
     try {
-      const res = ledgerEngine.adjustUserBalance({
-        adminId: currentUser.id,
-        targetUserId: targetUser.id,
+      const updatedUser = await authApi.updateAdminUser({
+        userId: targetUser.id,
         balanceType,
         operation: adjustOperation,
         amount: Number(adjustAmount),
         reason: adjustReason,
       });
-
-      if (res.success) {
-        success('Balance Adjusted', `Successfully ${adjustOperation === 'CREDIT' ? 'credited' : 'debited'} $${adjustAmount} to ${targetUser.fullName}'s ${balanceType} balance.`);
-        setAdjustModalOpen(false);
-      }
-    } catch (e: any) {
-      toastError('Adjustment Error', e.message);
+      setAllUsers(users => users.map(user => user.id === updatedUser.id ? updatedUser : user));
+      success('Balance Adjusted', `Successfully ${adjustOperation === 'CREDIT' ? 'credited' : 'debited'} $${adjustAmount} to ${targetUser.fullName}'s ${balanceType} balance.`);
+      setAdjustModalOpen(false);
+    } catch (error) {
+      toastError('Adjustment Error', error instanceof Error ? error.message : 'Unable to adjust balance.');
     }
   };
 
-  const handleToggleStatus = (u: User, newStatus: UserStatus) => {
-    const users = storage.getUsers();
-    const updatedUser = { ...u, status: newStatus, updatedAt: new Date().toISOString() };
-    const updatedList = users.map(user => user.id === u.id ? updatedUser : user);
-    storage.saveUsers(updatedList);
-
-    storage.addAuditLog({
-      actorId: currentUser.id,
-      actorUsername: currentUser.username,
-      action: 'USER_STATUS_CHANGED',
-      entity: 'User',
-      entityId: u.id,
-      previousState: { status: u.status },
-      newState: { status: newStatus },
-      notes: `Admin changed ${u.username} status to ${newStatus}`,
-    });
-
-    success('Status Updated', `${u.fullName} is now ${newStatus}`);
+  const handleToggleStatus = async (u: User, newStatus: UserStatus) => {
+    try {
+      const updatedUser = await authApi.updateAdminUser({ userId: u.id, status: newStatus });
+      setAllUsers(users => users.map(user => user.id === updatedUser.id ? updatedUser : user));
+      success('Status Updated', `${u.fullName} is now ${newStatus}`);
+    } catch (error) {
+      toastError('Status Update Error', error instanceof Error ? error.message : 'Unable to update status.');
+    }
   };
 
   return (
