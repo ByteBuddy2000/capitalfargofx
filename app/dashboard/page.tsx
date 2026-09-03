@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from "@/auth";
+import { connectToDatabase } from '@/lib/mongodb';
+import { User as UserModel } from '@/models/User';
 import DashboardClient from './DashboardClient';
 import type { User } from '@/types';
 
@@ -10,25 +12,32 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
+  await connectToDatabase();
+  const storedUser = await UserModel.findById(session.user.id).select('-passwordHash').lean();
+
+  if (!storedUser) redirect('/login');
+
   const user: User = {
-    id: session.user.id,
-    fullName: session.user.fullName || session.user.name?.split(' ')[0] || '',
-    username: session.user.username || '',
-    email: session.user.email,
-    role: session.user.role,
-    status: session.user.status || 'ACTIVE',
-    btcWallet: session.user.btcWallet || '',
-    ethWallet: session.user.ethWallet || '',
-    usdtWallet: session.user.usdtWallet || '',
-    uplineId: null,
-    uplineUsername: session.user.uplineUsername,
-    availableBalance: 0,
-    earningBalance: 0,
-    totalDeposits: 0,
-    totalWithdrawals: 0,
-    referralEarnings: 0,
-    createdAt: '',
-    updatedAt: '',
+    id: storedUser._id.toString(),
+    fullName: storedUser.fullName,
+    username: storedUser.username,
+    email: storedUser.email,
+    role: storedUser.role,
+    status: storedUser.status,
+    btcWallet: storedUser.btcWallet,
+    ethWallet: storedUser.ethWallet,
+    usdtWallet: storedUser.usdtWallet,
+    uplineId: storedUser.uplineId?.toString() || null,
+    uplineUsername: storedUser.uplineUsername,
+    availableBalance: storedUser.availableBalance,
+    earningBalance: storedUser.earningBalance,
+    totalDeposits: storedUser.totalDeposits,
+    totalWithdrawals: storedUser.totalWithdrawals,
+    referralEarnings: storedUser.referralEarnings,
+    kycStatus: storedUser.kycStatus,
+    createdAt: storedUser.createdAt.toISOString(),
+    updatedAt: storedUser.updatedAt.toISOString(),
+    assets: [],
   };
 
   return <DashboardClient currentUser={user} />;

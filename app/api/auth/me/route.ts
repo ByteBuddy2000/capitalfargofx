@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { User, type IUser } from '@/models/User';
+import { Asset } from '@/models/Asset';
 
 interface PublicUserData {
   id: string;
@@ -23,10 +24,17 @@ interface PublicUserData {
   kycStatus: string;
   createdAt: string;
   updatedAt: string;
+  assets: Array<{
+    id: string;
+    symbol: string;
+    availableBalance: number;
+    lockedBalance: number;
+    walletAddress: string;
+  }>;
   [key: string]: unknown;
 }
 
-const publicUser = (user: IUser): PublicUserData => ({
+const publicUser = (user: IUser, assets: PublicUserData['assets']): PublicUserData => ({
   id: user._id.toString(),
   fullName: user.fullName,
   username: user.username,
@@ -46,6 +54,7 @@ const publicUser = (user: IUser): PublicUserData => ({
   kycStatus: user.kycStatus,
   createdAt: user.createdAt.toISOString(),
   updatedAt: user.updatedAt.toISOString(),
+  assets,
 });
 
 export async function GET(): Promise<NextResponse<{ user: PublicUserData } | { message: string }>> {
@@ -64,7 +73,16 @@ export async function GET(): Promise<NextResponse<{ user: PublicUserData } | { m
       return NextResponse.json({ message: 'User account not found.' }, { status: 404 });
     }
 
-    return NextResponse.json({ user: publicUser(user) });
+    const assets = await Asset.find({ userId: user._id }).sort({ symbol: 1 }).lean();
+    return NextResponse.json({
+      user: publicUser(user, assets.map(asset => ({
+        id: asset._id.toString(),
+        symbol: asset.symbol,
+        availableBalance: asset.availableBalance,
+        lockedBalance: asset.lockedBalance,
+        walletAddress: asset.walletAddress,
+      }))),
+    }, { headers: { 'Cache-Control': 'private, no-store, max-age=0' } });
   } catch (error: unknown) {
     console.error('Failed to load authenticated user:', error);
     return NextResponse.json({ message: 'Internal server error.' }, { status: 500 });

@@ -24,6 +24,15 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   kycStatus?: 'VERIFIED' | 'PENDING' | 'UNVERIFIED';
+  assets?: UserAsset[];
+}
+
+export interface UserAsset {
+  id: string;
+  symbol: 'BTC' | 'ETH' | 'USDT';
+  availableBalance: number;
+  lockedBalance: number;
+  walletAddress: string;
 }
 
 export interface InvestmentPlan {

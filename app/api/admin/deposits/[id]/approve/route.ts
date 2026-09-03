@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/auth';
+import { authErrorStatus, requireAdmin } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Deposit, type IDeposit } from '@/models/Deposit';
 import { Investment } from '@/models/Investment';
 import { User, type IUser } from '@/models/User';
 import { Transaction } from '@/models/Transaction';
 import { type IPlan } from '@/models/Plan';
+import { Notification } from '@/models/Notification';
 
 export async function POST(
   request: NextRequest,
@@ -74,6 +75,7 @@ export async function POST(
         type: 'DEPOSIT',
         amount: deposit.amount,
         asset: deposit.asset,
+        txHash: deposit.txHash,
         status: 'COMPLETED',
         description: `${plan.name} confirmed deposit`,
         referenceId: deposit._id,
@@ -88,6 +90,13 @@ export async function POST(
       status: 'COMPLETED',
       description: `${plan.name} investment activated`,
       referenceId: investment._id,
+    });
+
+    await Notification.create({
+      userId: deposit.userId,
+      title: 'Deposit approved',
+      message: `Your ${plan.name} deposit has been approved and the investment is now active.`,
+      type: 'DEPOSIT',
     });
 
     if (investor.uplineId) {
@@ -115,6 +124,8 @@ export async function POST(
 
     return NextResponse.json({ deposit, investment });
   } catch (error: unknown) {
+    const authStatus = authErrorStatus(error);
+    if (authStatus) return NextResponse.json({ message: authStatus === 401 ? 'Authentication required.' : 'Administrator access required.' }, { status: authStatus });
     console.error(error);
     return NextResponse.json({ message: 'Internal server error.' }, { status: 500 });
   }

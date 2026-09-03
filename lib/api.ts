@@ -82,6 +82,18 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const authApi = {
+  async me() {
+    const result = await request<{ user: User }>('/auth/me', { cache: 'no-store' });
+    return result.user;
+  },
+  async prices() {
+    const result = await request<{ prices: { BTC: number; ETH: number; USDT: number }; source: string }>('/prices');
+    return result.prices;
+  },
+  async assets() {
+    const result = await request<{ assets: Array<{ _id?: string; userId: string; symbol: 'BTC' | 'ETH' | 'USDT'; availableBalance: number; lockedBalance: number; walletAddress: string }> }>('/me/assets');
+    return result.assets.map(normalizeRecord);
+  },
   async plans() {
     const result = await request<{ plans: (InvestmentPlan & { _id?: string })[] }>('/plans');
     return result.plans.map(normalizeRecord);

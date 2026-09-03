@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/auth';
+import { authErrorStatus, requireAdmin } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Deposit } from '@/models/Deposit';
 
@@ -19,6 +19,8 @@ export async function GET() {
 
     return NextResponse.json({ deposits });
   } catch (error: unknown) {
+    const authStatus = authErrorStatus(error);
+    if (authStatus) return NextResponse.json({ message: 'Administrator access required.' }, { status: authStatus });
     console.error(error);
     return NextResponse.json({ message: 'Internal server error.' }, { status: 500 });
   }

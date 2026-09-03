@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { signOut } from 'next-auth/react';
 import { DashboardLayout, type DashboardTab } from '@/components/dashboard/DashboardLayout';
 import { DashboardOverview } from '@/components/dashboard/DashboardOverview';
@@ -13,6 +13,7 @@ import { AccountView } from '@/components/dashboard/AccountView';
 import { SupportView } from '@/components/dashboard/SupportView';
 import { ToastProvider } from '@/components/ui/Toast';
 import type { User } from '@/types';
+import { authApi } from '@/lib/api';
 
 interface DashboardClientProps {
   currentUser: User;
@@ -21,6 +22,14 @@ interface DashboardClientProps {
 export default function DashboardClient({ currentUser: initialUser }: DashboardClientProps) {
   const [currentUser, setCurrentUser] = useState(initialUser);
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+
+  useEffect(() => {
+    void authApi.me().then(setCurrentUser).catch(() => undefined);
+  }, []);
+
+  const refreshUser = () => {
+    void authApi.me().then(setCurrentUser).catch(() => undefined);
+  };
 
   const logout = async () => {
     await signOut({ callbackUrl: '/' });
@@ -40,14 +49,14 @@ export default function DashboardClient({ currentUser: initialUser }: DashboardC
         {activeTab === 'deposit' && (
           <DepositView
             currentUser={currentUser}
-            onDepositSuccess={() => undefined}
+            onDepositSuccess={refreshUser}
             onNavigateTransactions={() => setActiveTab('transactions')}
           />
         )}
         {activeTab === 'withdraw' && (
           <WithdrawView
             currentUser={currentUser}
-            onWithdrawSuccess={() => undefined}
+            onWithdrawSuccess={refreshUser}
             onNavigateAccount={() => setActiveTab('account')}
             onNavigateTransactions={() => setActiveTab('transactions')}
           />

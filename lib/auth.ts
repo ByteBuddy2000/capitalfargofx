@@ -28,3 +28,10 @@ export async function requireAdmin() {
 
   return user;
 }
+
+export function authErrorStatus(error: unknown): number | null {
+  if (!(error instanceof Error)) return null;
+  if (error.message.startsWith("Unauthorized:")) return 401;
+  if (error.message.startsWith("Forbidden:")) return 403;
+  return null;
+}

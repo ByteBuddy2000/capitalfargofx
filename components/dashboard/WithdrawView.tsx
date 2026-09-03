@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   ArrowUpFromLine, 
   DollarSign, 
@@ -40,10 +40,22 @@ export const WithdrawView: React.FC<WithdrawViewProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [submittedWithdrawal, setSubmittedWithdrawal] = useState<Withdrawal | null>(null);
+  const [prices, setPrices] = useState({ BTC: 64000, ETH: 3400, USDT: 1 });
 
   const { success, error: toastError } = useToast();
 
   const minWithdrawal = 50;
+
+  useEffect(() => {
+    void authApi.prices().then(setPrices).catch(() => undefined);
+  }, []);
+
+  const selectedPrice = prices[selectedCrypto];
+  const cryptoAmount = amount > 0 ? amount / selectedPrice : 0;
+  const selectedAsset = currentUser.assets?.find(asset => asset.symbol === selectedCrypto);
+  const selectedAssetUsdBalance = selectedAsset
+    ? Number(selectedAsset.availableBalance || 0) * selectedPrice
+    : Number(currentUser.availableBalance || 0);
 
   // Sync wallet address when selectedCrypto changes
   const handleCryptoChange = (symbol: 'BTC' | 'ETH' | 'USDT') => {
@@ -62,8 +74,8 @@ export const WithdrawView: React.FC<WithdrawViewProps> = ({
       return;
     }
 
-    if (amount > currentUser.availableBalance) {
-      setErrorMsg(`Insufficient available balance ($${currentUser.availableBalance.toFixed(2)} available).`);
+    if (amount > selectedAssetUsdBalance) {
+      setErrorMsg(`Insufficient ${selectedCrypto} balance ($${selectedAssetUsdBalance.toFixed(2)} USD available).`);
       return;
     }
 
@@ -212,10 +224,10 @@ export const WithdrawView: React.FC<WithdrawViewProps> = ({
                   </label>
                   <button
                     type="button"
-                    onClick={() => setAmount(currentUser?.availableBalance || 0)}
+                    onClick={() => setAmount(selectedAssetUsdBalance)}
                     className="text-xs font-bold text-blue-600 hover:text-blue-700 cursor-pointer"
                   >
-                    Max (${(currentUser?.availableBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })})
+                    Max (${selectedAssetUsdBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })})
                   </button>
                 </div>
                 <div className="relative">
@@ -223,7 +235,7 @@ export const WithdrawView: React.FC<WithdrawViewProps> = ({
                   <input
                     type="number"
                     min={minWithdrawal}
-                    max={currentUser?.availableBalance || 0}
+                    max={selectedAssetUsdBalance}
                     step={10}
                     value={amount}
                     onChange={e => setAmount(Number(e.target.value))}
@@ -233,7 +245,10 @@ export const WithdrawView: React.FC<WithdrawViewProps> = ({
                 </div>
                 <div className="flex justify-between text-xs text-slate-500 mt-1">
                   <span>Minimum: ${minWithdrawal.toFixed(2)}</span>
-                  <span>Available: ${(currentUser?.availableBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  <span>Available: ${selectedAssetUsdBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="text-xs font-semibold text-blue-600">
+                  Estimated: {cryptoAmount.toFixed(selectedCrypto === 'BTC' ? 6 : 4)} {selectedCrypto} at ${selectedPrice.toLocaleString()} USD
                 </div>
               </div>
 
@@ -283,7 +298,7 @@ export const WithdrawView: React.FC<WithdrawViewProps> = ({
                 variant="primary"
                 size="lg"
                 isLoading={isSubmitting}
-                disabled={(currentUser?.availableBalance || 0) < minWithdrawal}
+                disabled={selectedAssetUsdBalance < minWithdrawal}
                 rightIcon={<ArrowRight className="w-4 h-4" />}
                 className="w-full justify-center bg-amber-600 hover:bg-amber-700 font-bold shadow-md shadow-amber-600/20"
               >

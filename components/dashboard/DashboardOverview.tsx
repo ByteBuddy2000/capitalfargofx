@@ -111,6 +111,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [pendingWithdrawals, setPendingWithdrawals] = useState(0);
+  const [cryptoPrices, setCryptoPrices] = useState({ BTC: 64000, ETH: 3400, USDT: 1 });
 
   const [isLoading, setIsLoading] = useState(true);
   const [settlingInvestmentId, setSettlingInvestmentId] =
@@ -163,6 +164,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       setPendingWithdrawals(
         Number.isFinite(pendingAmount) ? pendingAmount : 0
       );
+
+      void authApi.prices().then(setCryptoPrices).catch(() => undefined);
     } catch {
       /*
        * Do not break the dashboard if one API request fails.
@@ -219,13 +222,22 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     currentUser?.totalDeposits ?? 0
   );
 
-  const totalBalance =
-    (Number.isFinite(availableBalance) ? availableBalance : 0) +
-    (Number.isFinite(earningBalance) ? earningBalance : 0);
-
   const totalEarnings =
     (Number.isFinite(earningBalance) ? earningBalance : 0) +
     (Number.isFinite(referralEarnings) ? referralEarnings : 0);
+
+  const assetValue = (symbol: 'BTC' | 'ETH' | 'USDT') => {
+    const asset = currentUser.assets?.find(item => item.symbol === symbol);
+    return Number(asset?.availableBalance || 0) * cryptoPrices[symbol];
+  };
+
+  const cryptoBalance = (currentUser.assets?.length || 0) > 0
+    ? assetValue('BTC') + assetValue('ETH') + assetValue('USDT')
+    : 0;
+  const totalBalance = cryptoBalance > 0
+    ? cryptoBalance + (Number.isFinite(earningBalance) ? earningBalance : 0)
+    : (Number.isFinite(availableBalance) ? availableBalance : 0) +
+      (Number.isFinite(earningBalance) ? earningBalance : 0);
 
   /*
    * ---------------------------------------------------------
@@ -746,12 +758,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 />
 
                 <Tooltip
-                  formatter={(
-                    value: number | string,
-                    name: string
-                  ) => [
+                  formatter={(value, name) => [
                     `$${formatCurrency(value)}`,
-                    name,
+                    String(name),
                   ]}
                   contentStyle={{
                     backgroundColor: '#0B172A',
@@ -826,7 +835,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 <div className="text-right">
                   <p className="font-mono text-xs font-bold text-[#0F172A]">
-                    Instant
+                    ${formatCurrency(assetValue('BTC'))}
                   </p>
 
                   <p className="text-[10px] font-medium text-[#059669]">
@@ -855,7 +864,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 <div className="text-right">
                   <p className="font-mono text-xs font-bold text-[#0F172A]">
-                    Instant
+                    ${formatCurrency(assetValue('ETH'))}
                   </p>
 
                   <p className="text-[10px] font-medium text-[#059669]">
@@ -884,7 +893,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 <div className="text-right">
                   <p className="font-mono text-xs font-bold text-[#0F172A]">
-                    Zero Fee
+                    ${formatCurrency(assetValue('USDT'))}
                   </p>
 
                   <p className="text-[10px] font-medium text-[#059669]">

@@ -52,6 +52,7 @@ export const DepositView: React.FC<DepositViewProps> = ({
     preselectedPlan ? preselectedPlan.minimumAmount : selectedPlan?.minimumAmount || 10000
   );
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT'>('USDT');
+  const [prices, setPrices] = useState({ BTC: 64000, ETH: 3400, USDT: 1 });
   
   // Confirmation state
   const [transactionHash, setTransactionHash] = useState<string>('');
@@ -60,6 +61,10 @@ export const DepositView: React.FC<DepositViewProps> = ({
 
   const [copiedWallet, setCopiedWallet] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    void authApi.prices().then(setPrices).catch(() => undefined);
+  }, []);
 
   React.useEffect(() => {
     const fallbackPlans = storage.getPlans();
@@ -85,8 +90,8 @@ export const DepositView: React.FC<DepositViewProps> = ({
   // Crypto conversion estimates (approximate for display)
   const getEstimatedCryptoAmount = () => {
     if (selectedCrypto === 'USDT') return `${amount.toFixed(2)} USDT`;
-    if (selectedCrypto === 'BTC') return `${(amount / 64000).toFixed(6)} BTC`;
-    if (selectedCrypto === 'ETH') return `${(amount / 3400).toFixed(4)} ETH`;
+    if (selectedCrypto === 'BTC') return `${(amount / prices.BTC).toFixed(6)} BTC`;
+    if (selectedCrypto === 'ETH') return `${(amount / prices.ETH).toFixed(4)} ETH`;
     return `${amount} USD`;
   };
 
@@ -131,8 +136,18 @@ export const DepositView: React.FC<DepositViewProps> = ({
     }
 
     const trimmedHash = transactionHash.trim();
-    if (!trimmedHash) {
-      setErrorMsg('Please paste the blockchain transaction hash before submitting your deposit.');
+    if (trimmedHash.length < 10) {
+      setErrorMsg('The blockchain transaction hash must be at least 10 characters long.');
+      return;
+    }
+
+    if (!activeWalletConfig.network || activeWalletConfig.network.trim().length < 2) {
+      setErrorMsg('The selected asset does not have a valid network configured.');
+      return;
+    }
+
+    if (!activeWalletConfig.address || activeWalletConfig.address.trim().length < 10) {
+      setErrorMsg('The selected asset does not have a valid receiving address configured.');
       return;
     }
 

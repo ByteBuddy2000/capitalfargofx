@@ -26,9 +26,9 @@ const depositSchema: Schema<IDeposit> = new mongoose.Schema(
     planId: { type: mongoose.Schema.Types.ObjectId, ref: 'Plan', required: true },
     amount: { type: Number, required: true, min: 0.01 },
     asset: { type: String, enum: ['BTC', 'ETH', 'USDT'], required: true },
-    network: { type: String, required: true, trim: true },
-    receivingAddress: { type: String, default: '' },
-    txHash: { type: String, default: '', trim: true },
+    network: { type: String, required: true, trim: true, minlength: 2 },
+    receivingAddress: { type: String, required: true, trim: true, minlength: 10 },
+    txHash: { type: String, required: true, trim: true, minlength: 10, maxlength: 200 },
     status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING', index: true },
     adminNotes: { type: String, default: '' },
     approvedAt: { type: Date, default: null },
@@ -38,5 +38,6 @@ const depositSchema: Schema<IDeposit> = new mongoose.Schema(
 );
 
 depositSchema.index({ userId: 1, createdAt: -1 });
+depositSchema.index({ txHash: 1 }, { unique: true });
 
 export const Deposit: Model<IDeposit> = mongoose.models.Deposit || mongoose.model<IDeposit>('Deposit', depositSchema);
