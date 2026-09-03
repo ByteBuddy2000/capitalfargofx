@@ -62,11 +62,11 @@ export async function PATCH(request: NextRequest) {
       user[field] = after;
       await user.save();
       const referenceId = user._id;
-      await LedgerEntry.create({ userId: user._id, type: 'ADJUSTMENT', amount, asset: 'USD', direction: body.operation === 'CREDIT' ? 'CREDIT' : 'DEBIT', referenceType: 'ADMIN_ADJUSTMENT', referenceId, balanceBefore: before, balanceAfter: after, description: body.reason.trim(), metadata: { adminId: admin._id.toString(), reason: body.reason.trim() } });
+      await LedgerEntry.create({ userId: user._id, type: 'ADJUSTMENT', amount, asset: 'USD', direction: body.operation === 'CREDIT' ? 'CREDIT' : 'DEBIT', referenceType: 'ADMIN_ADJUSTMENT', referenceId, balanceBefore: before, balanceAfter: after, description: body.reason.trim(), metadata: { adminId: admin.id, reason: body.reason.trim() } });
       await Transaction.create({ userId: user._id, type: 'ADJUSTMENT', amount, asset: 'USD', status: 'COMPLETED', description: body.reason.trim(), referenceId });
     }
 
-    return NextResponse.json({ user: publicUser(user.toObject() as Record<string, unknown>) });
+    return NextResponse.json({ user: publicUser(user.toObject() as unknown as Record<string, unknown>) });
   } catch (error: unknown) {
     console.error('Failed to update admin user:', error);
     return NextResponse.json({ message: 'Unable to update user.' }, { status: 500 });
