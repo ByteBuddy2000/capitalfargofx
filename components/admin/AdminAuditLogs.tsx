@@ -1,22 +1,17 @@
 import React, { useState } from 'react';
 import { 
   ScrollText, 
-  Search, 
-  Filter, 
-  ShieldCheck, 
-  Clock, 
-  FileText 
+  Search
 } from 'lucide-react';
 import { User, AuditLog } from '../../types';
 import { storage } from '../../lib/storage';
-import { Badge } from '../ui/Badge';
 import { Modal } from '../ui/Modal';
 
 interface AdminAuditLogsProps {
   currentUser: User;
 }
 
-export const AdminAuditLogs: React.FC<AdminAuditLogsProps> = ({ currentUser }) => {
+export const AdminAuditLogs: React.FC<AdminAuditLogsProps> = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('ALL');
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);

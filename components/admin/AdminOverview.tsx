@@ -3,19 +3,12 @@ import {
   Users, 
   ArrowDownToLine, 
   ArrowUpFromLine, 
-  Layers, 
-  Clock, 
-  CheckCircle2, 
-  XCircle, 
-  AlertTriangle, 
-  ArrowRight,
-  ShieldCheck,
-  TrendingUp
+  Layers,
+  ShieldCheck
 } from 'lucide-react';
 import { User, Deposit, Withdrawal } from '../../types';
 import { authApi } from '../../lib/api';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
 import { useToast } from '../ui/Toast';
 import { AdminTab } from './AdminLayout';
 
@@ -24,7 +17,7 @@ interface AdminOverviewProps {
   onNavigateTab: (tab: AdminTab) => void;
 }
 
-export const AdminOverview: React.FC<AdminOverviewProps> = ({ currentUser, onNavigateTab }) => {
+export const AdminOverview: React.FC<AdminOverviewProps> = ({ onNavigateTab }) => {
   const { success, error: toastError } = useToast();
 
   const [users, setUsers] = useState<User[]>([]);
@@ -64,25 +57,17 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({ currentUser, onNav
     .reduce((sum, i) => sum + i.amount, 0);
 
   const handleQuickApproveDeposit = (deposit: Deposit) => {
-    try {
-      void authApi.approveDeposit(deposit.id).then(() => {
-        setDeposits(current => current.filter(item => item.id !== deposit.id));
-        success('Deposit Approved', `$${(deposit?.amount || 0).toLocaleString()} credited and investment activated!`);
-      }).catch(error => toastError('Approval Error', error instanceof Error ? error.message : 'Unable to approve deposit.'));
-    } catch (e: any) {
-      toastError('Approval Error', e.message);
-    }
+    void authApi.approveDeposit(deposit.id).then(() => {
+      setDeposits(current => current.filter(item => item.id !== deposit.id));
+      success('Deposit Approved', `$${(deposit?.amount || 0).toLocaleString()} credited and investment activated!`);
+    }).catch(error => toastError('Approval Error', error instanceof Error ? error.message : 'Unable to approve deposit.'));
   };
 
   const handleQuickApproveWithdrawal = (withdrawal: Withdrawal) => {
-    try {
-      void authApi.updateWithdrawal(withdrawal.id, 'COMPLETED').then(() => {
-        setWithdrawals(current => current.filter(item => item.id !== withdrawal.id));
-        success('Withdrawal Dispatched', `$${(withdrawal?.amount || 0).toLocaleString()} broadcast to blockchain network.`);
-      }).catch(error => toastError('Approval Error', error instanceof Error ? error.message : 'Unable to approve withdrawal.'));
-    } catch (e: any) {
-      toastError('Approval Error', e.message);
-    }
+    void authApi.updateWithdrawal(withdrawal.id, 'COMPLETED').then(() => {
+      setWithdrawals(current => current.filter(item => item.id !== withdrawal.id));
+      success('Withdrawal Dispatched', `$${(withdrawal?.amount || 0).toLocaleString()} broadcast to blockchain network.`);
+    }).catch(error => toastError('Approval Error', error instanceof Error ? error.message : 'Unable to approve withdrawal.'));
   };
 
   return (

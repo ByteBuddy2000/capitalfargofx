@@ -5,9 +5,6 @@ import {
   RotateCcw, 
   ShieldAlert, 
   Globe, 
-  Mail, 
-  Send, 
-  MapPin, 
   CheckCircle2 
 } from 'lucide-react';
 import { User, PlatformSettings } from '../../types';

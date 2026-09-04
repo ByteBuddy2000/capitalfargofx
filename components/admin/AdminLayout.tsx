@@ -11,9 +11,6 @@ import {
   ScrollText, 
   ArrowLeft, 
   LogOut,
-  Bell,
-  CheckCircle2,
-  AlertTriangle,
   Menu,
   X
 } from 'lucide-react';

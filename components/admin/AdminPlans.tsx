@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { 
   Layers, 
   Plus, 
-  Edit2, 
-  Save, 
-  Check, 
-  CheckCircle2, 
-  TrendingUp, 
-  Clock, 
-  DollarSign 
+  Edit2
 } from 'lucide-react';
 import { User, InvestmentPlan } from '../../types';
 import { storage } from '../../lib/storage';

@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { 
   Wallet, 
   Edit2, 
-  Save, 
-  Check, 
-  Plus, 
-  QrCode, 
-  Copy 
+  Plus
 } from 'lucide-react';
 import { User, CryptoWalletConfig } from '../../types';
 import { storage } from '../../lib/storage';

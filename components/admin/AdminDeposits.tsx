@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
 import { 
   ArrowDownToLine, 
-  Search, 
-  Filter, 
-  CheckCircle2, 
-  XCircle, 
-  ExternalLink, 
-  Clock, 
-  Copy, 
-  Check 
+  Search
 } from 'lucide-react';
 import { User, Deposit } from '../../types';
-import { storage } from '../../lib/storage';
 import { authApi } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -22,7 +14,7 @@ interface AdminDepositsProps {
   currentUser: User;
 }
 
-export const AdminDeposits: React.FC<AdminDepositsProps> = ({ currentUser }) => {
+export const AdminDeposits: React.FC<AdminDepositsProps> = () => {
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
   const [searchTerm, setSearchTerm] = useState('');
   

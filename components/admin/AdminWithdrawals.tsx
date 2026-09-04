@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  ArrowUpFromLine, 
-  Search, 
-  CheckCircle2, 
-  XCircle, 
-  Send, 
-  AlertCircle 
+  ArrowUpFromLine,
+  Search
 } from 'lucide-react';
 import { User, Withdrawal } from '../../types';
-import { storage } from '../../lib/storage';
 import { authApi } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -20,7 +15,7 @@ interface AdminWithdrawalsProps {
   currentUser: User;
 }
 
-export const AdminWithdrawals: React.FC<AdminWithdrawalsProps> = ({ currentUser }) => {
+export const AdminWithdrawals: React.FC<AdminWithdrawalsProps> = () => {
   const [filter, setFilter] = useState<'PENDING' | 'ALL' | 'COMPLETED' | 'REJECTED'>('PENDING');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -52,7 +47,7 @@ export const AdminWithdrawals: React.FC<AdminWithdrawalsProps> = ({ currentUser 
 
   const handleOpenApprove = (w: Withdrawal) => {
     setTargetWithdrawal(w);
-    const broadcastId = `0x${Math.random().toString(36).substring(2, 12)}broadcast_${Date.now()}`;
+    const broadcastId = `0x${w.id}_broadcast`;
     setBroadcastTxHash(broadcastId);
     setApproveModalOpen(true);
   };

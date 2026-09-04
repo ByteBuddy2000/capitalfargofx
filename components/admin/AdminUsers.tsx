@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Users, 
-  Search, 
-  ShieldCheck, 
-  DollarSign, 
-  Edit3, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Ban, 
-  KeyRound 
+  Search
 } from 'lucide-react';
 import { User, UserStatus } from '../../types';
 import { authApi } from '../../lib/api';
@@ -219,7 +212,7 @@ export const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
                 </label>
                 <select
                   value={balanceType}
-                  onChange={e => setBalanceType(e.target.value as any)}
+                  onChange={e => setBalanceType(e.target.value as 'available' | 'earning')}
                   className="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900"
                 >
                   <option value="available">Available Balance</option>
@@ -233,7 +226,7 @@ export const AdminUsers: React.FC<AdminUsersProps> = ({ currentUser }) => {
                 </label>
                 <select
                   value={adjustOperation}
-                  onChange={e => setAdjustOperation(e.target.value as any)}
+                  onChange={e => setAdjustOperation(e.target.value as 'CREDIT' | 'DEBIT')}
                   className="w-full py-2 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-900"
                 >
                   <option value="CREDIT">Credit (+ Add Funds)</option>

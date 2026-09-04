@@ -3,11 +3,9 @@ import {
   Users, 
   Search, 
   TrendingUp, 
-  DollarSign, 
-  Gift, 
-  ShieldCheck 
+  Gift
 } from 'lucide-react';
-import { User, Referral } from '../../types';
+import { User } from '../../types';
 import { storage } from '../../lib/storage';
 import { Badge } from '../ui/Badge';
 
@@ -15,12 +13,10 @@ interface AdminReferralsProps {
   currentUser: User;
 }
 
-export const AdminReferrals: React.FC<AdminReferralsProps> = ({ currentUser }) => {
+export const AdminReferrals: React.FC<AdminReferralsProps> = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const allReferrals = storage.getReferrals();
-  const allUsers = storage.getUsers();
-
   const filtered = allReferrals.filter(r => {
     if (!searchTerm.trim()) return true;
     const q = searchTerm.toLowerCase();
