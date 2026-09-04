@@ -4,13 +4,7 @@ import {
   Check, 
   Sparkles, 
   ArrowRight, 
-  Clock, 
-  ShieldCheck, 
-  Users, 
-  Calculator, 
-  DollarSign, 
-  TrendingUp,
-  Percent,
+  Calculator,
   CheckCircle2
 } from 'lucide-react';
 import { InvestmentPlan } from '../../types';

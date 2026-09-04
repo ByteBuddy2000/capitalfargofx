@@ -1,6 +1,7 @@
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
-import { Star, CheckCircle2, Quote } from 'lucide-react';
+import { Star, CheckCircle2 } from 'lucide-react';
 import { Testimonial } from '../../types';
 import { storage } from '../../lib/storage';
 
@@ -55,9 +56,12 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ testim
               </div>
 
               <div className="flex items-center gap-3.5 pt-4 border-t border-slate-200/60">
-                <img
+                <Image
                   src={test.avatar}
                   alt={test.name}
+                  width={44}
+                  height={44}
+                  unoptimized
                   className="w-11 h-11 rounded-full object-cover border border-slate-200"
                 />
                 <div>

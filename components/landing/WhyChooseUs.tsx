@@ -6,8 +6,7 @@ import {
   Layers, 
   Zap, 
   PieChart, 
-  Headphones,
-  Check
+  Headphones
 } from 'lucide-react';
 
 export const WhyChooseUs: React.FC = () => {
