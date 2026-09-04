@@ -4,13 +4,11 @@ import {
   Copy, 
   Check, 
   TrendingUp, 
-  ShieldCheck, 
   UserCheck, 
-  ExternalLink,
   DollarSign,
   Gift
 } from 'lucide-react';
-import { User, Referral } from '../../types';
+import { User } from '../../types';
 import { storage } from '../../lib/storage';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';

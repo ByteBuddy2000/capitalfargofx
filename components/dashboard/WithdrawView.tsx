@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { 
   ArrowUpFromLine, 
-  DollarSign, 
-  Coins, 
   Wallet, 
   ShieldCheck, 
   AlertCircle, 
   CheckCircle2, 
-  Clock, 
-  ArrowRight,
-  ExternalLink
+  ArrowRight
 } from 'lucide-react';
 import { User, Withdrawal } from '../../types';
-import { storage } from '../../lib/storage';
 import { authApi } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';

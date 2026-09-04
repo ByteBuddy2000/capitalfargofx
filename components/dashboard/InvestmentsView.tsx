@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { 
   Layers, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle2, 
-  Calendar, 
   ArrowRight, 
   Play, 
-  DollarSign,
   ShieldCheck
 } from 'lucide-react';
 import { User, Investment } from '../../types';
@@ -22,9 +17,9 @@ interface InvestmentsViewProps {
 }
 
 export const InvestmentsView: React.FC<InvestmentsViewProps> = ({
-  currentUser,
   onNavigateDeposit,
 }) => {
+  const [currentTime] = useState(() => Date.now());
   const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'COMPLETED'>('ALL');
   const [allInvestments, setAllInvestments] = useState<Investment[]>([]);
   const { success, info } = useToast();
@@ -166,7 +161,7 @@ export const InvestmentsView: React.FC<InvestmentsViewProps> = ({
           {filtered.map(inv => {
             const start = new Date(inv.startDate).getTime();
             const end = new Date(inv.maturityDate).getTime();
-            const now = Date.now();
+            const now = currentTime;
             const progress = inv.status === 'COMPLETED' 
               ? 100 
               : Math.min(100, Math.max(0, Math.round(((now - start) / (end - start)) * 100)));

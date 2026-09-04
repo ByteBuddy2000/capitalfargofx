@@ -7,14 +7,11 @@ import {
   ArrowUpFromLine, 
   Layers, 
   TrendingUp, 
-  Users, 
-  ExternalLink,
-  Download
+  Users
 } from 'lucide-react';
-import { User, Transaction, TransactionType } from '../../types';
+import { User, TransactionType } from '../../types';
 import { storage } from '../../lib/storage';
 import { Badge } from '../ui/Badge';
-import { Button } from '../ui/Button';
 
 interface TransactionsViewProps {
   currentUser: User;

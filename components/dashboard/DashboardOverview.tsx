@@ -112,6 +112,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [pendingWithdrawals, setPendingWithdrawals] = useState(0);
   const [cryptoPrices, setCryptoPrices] = useState({ BTC: 64000, ETH: 3400, USDT: 1 });
+  const [currentTime] = useState(() => Date.now());
 
   const [isLoading, setIsLoading] = useState(true);
   const [settlingInvestmentId, setSettlingInvestmentId] =
@@ -177,7 +178,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   }, []);
 
   useEffect(() => {
-    void loadDashboardData();
+    const loadTask = window.setTimeout(() => {
+      void loadDashboardData();
+    }, 0);
+
+    return () => window.clearTimeout(loadTask);
   }, [loadDashboardData]);
 
   /*
@@ -452,7 +457,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
     if (
       maturityTimestamp === null ||
-      maturityTimestamp > Date.now()
+      maturityTimestamp > currentTime
     ) {
       info(
         'Investment Still Active',
@@ -996,7 +1001,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   investment.maturityDate
                 );
 
-                const now = Date.now();
+                const now = currentTime;
 
                 let progress = 0;
 
@@ -1254,7 +1259,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <p className="text-[11px] leading-relaxed text-[#64748B]">
               Balance movements, investment activity and
               withdrawal requests are recorded through the
-              platform's transaction system.
+              platform&apos;s transaction system.
             </p>
           </div>
         </div>

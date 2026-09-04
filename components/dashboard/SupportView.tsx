@@ -3,11 +3,7 @@ import {
   Headphones, 
   Mail, 
   Send, 
-  MessageSquare, 
-  CheckCircle2, 
-  ArrowRight, 
-  Clock, 
-  ExternalLink 
+  ArrowRight
 } from 'lucide-react';
 import { User, SupportTicket } from '../../types';
 import { storage } from '../../lib/storage';
@@ -132,7 +128,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ currentUser }) => {
                   </label>
                   <select
                     value={priority}
-                    onChange={e => setPriority(e.target.value as any)}
+                    onChange={e => setPriority(e.target.value as 'LOW' | 'MEDIUM' | 'HIGH')}
                     className="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
                   >
                     <option value="LOW">Low - General Inquiries</option>

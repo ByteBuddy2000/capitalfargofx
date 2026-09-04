@@ -5,15 +5,12 @@ import {
   Copy, 
   ArrowRight, 
   ArrowLeft, 
-  Coins, 
   ShieldCheck, 
   AlertCircle, 
   CheckCircle2, 
-  Clock, 
-  ExternalLink,
-  Layers
+  Clock
 } from 'lucide-react';
-import { User, InvestmentPlan, CryptoWalletConfig, Deposit } from '../../types';
+import { User, InvestmentPlan, Deposit } from '../../types';
 import { storage } from '../../lib/storage';
 import { authApi } from '../../lib/api';
 import { Button } from '../ui/Button';
@@ -30,7 +27,6 @@ interface DepositViewProps {
 }
 
 export const DepositView: React.FC<DepositViewProps> = ({
-  currentUser,
   preselectedPlan,
   onDepositSuccess,
   onNavigateTransactions,
